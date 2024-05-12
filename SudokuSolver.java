@@ -13,6 +13,28 @@ public class Main {
                 {0, 0, 7, 0, 4, 0, 2, 0, 3}
         };
         printBoard(board);
+        if (solveboard(board)) {
+            System.out.println("Solution found");
+        }
+        else {
+            System.out.println("No solution found");
+        }
+        printBoard(board);
+    }
+
+    private static void printBoard(int[][] board) {
+        for (int row = 0; row < GRID_SIZE; row++) {
+            if (row % 3 == 0 && row != 0) {
+                System.out.println("-----------------");
+            }
+            for (int col = 0; col < GRID_SIZE; col++) {
+                if (col % 3 == 0 && col != 0) {
+                    System.out.print("|");
+                }
+                System.out.print(board[row][col] + " ");
+            }
+            System.out.println();
+        }
     }
 
     private static boolean isNumberInRow(int[][] board, int number, int row) {
@@ -48,11 +70,24 @@ public class Main {
                 && !isNumberInBox(board, number, row, column);
     }
     private static boolean solveboard(int[][] board) {
-        for (int i = 0; i < GRID_SIZE; i++) {
-            for (int j = 0; j < GRID_SIZE; j++) {
+        for (int row = 0; row < GRID_SIZE; row++) {
+            for (int column = 0; column < GRID_SIZE; column++) {
+                if (board[row][column] == 0) {
+                    for (int numbertry = 1; numbertry <= GRID_SIZE; numbertry++) {
+                        if (isValidPlacement(board, numbertry, row, column)) {
+                            board[row][column] = numbertry;
+                            if (solveboard(board)) {
+                                return true;
+                            }
+                            else {
+                                board[row][column] = 0;
+                            }
+                        }
+                    }
+                    return false;
                 }
             }
         }
+        return true;
     }
-
 }
