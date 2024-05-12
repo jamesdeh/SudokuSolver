@@ -1,39 +1,166 @@
 public class Main {
     private static final int GRID_SIZE = 9;
     public static void main(String[] args) {
-        int board[][] = {
-                {7, 0, 2, 0, 5, 0, 6, 0, 0},
-                {0, 0, 0, 0, 0, 3, 0, 0, 0},
-                {1, 0, 0, 0, 0, 9, 5, 0, 0},
-                {8, 0, 0, 0, 0, 0, 0, 9, 0},
-                {0, 4, 3, 0, 0, 0, 7, 5, 0},
-                {0, 9, 0, 0, 0, 0, 0, 0, 8},
-                {0, 0, 9, 7, 0, 0, 0, 0, 5},
-                {0, 0, 0, 2, 0, 0, 0, 0, 0},
-                {0, 0, 7, 0, 4, 0, 2, 0, 3}
-        };
-        printBoard(board);
-        if (solveboard(board)) {
+        int N = 9, K = 20;
+        Sudoku sudoku = new Sudoku(N, K);
+        sudoku.fillValues();
+        sudoku.printSudoku();
+        if (solveboard(sudoku.mat)) {
             System.out.println("Solution found");
-        }
-        else {
+        } else {
             System.out.println("No solution found");
         }
-        printBoard(board);
+        sudoku.printSudoku();
     }
+    public static class Sudoku {
+        int[][] mat;
+        int N;
+        int SRN;
+        int K;
+        Sudoku(int N, int K)
+        {
+            this.N = N;
+            this.K = K;
+            double SRNd = Math.sqrt(N);
+            SRN = (int) SRNd;
+            mat = new int[N][N];
+        }
+        public void fillValues()
+        {
+            fillDiagonal();
+            fillRemaining(0, SRN);
+            removeKDigits();
+        }
+        void fillDiagonal()
+        {
+            for (int i = 0; i<N; i=i+SRN)
+                fillBox(i, i);
+        }
+        boolean unUsedInBox(int rowStart, int colStart, int num)
+        {
+            for (int i = 0; i<SRN; i++)
+                for (int j = 0; j<SRN; j++)
+                    if (mat[rowStart+i][colStart+j]==num)
+                        return false;
 
-    private static void printBoard(int[][] board) {
-        for (int row = 0; row < GRID_SIZE; row++) {
-            if (row % 3 == 0 && row != 0) {
-                System.out.println("-----------------");
-            }
-            for (int col = 0; col < GRID_SIZE; col++) {
-                if (col % 3 == 0 && col != 0) {
-                    System.out.print("|");
+            return true;
+        }
+        void fillBox(int row,int col)
+        {
+            int num;
+            for (int i=0; i<SRN; i++)
+            {
+                for (int j=0; j<SRN; j++)
+                {
+                    do
+                    {
+                        num = randomGenerator(N);
+                    }
+                    while (!unUsedInBox(row, col, num));
+
+                    mat[row+i][col+j] = num;
                 }
-                System.out.print(board[row][col] + " ");
             }
-            System.out.println();
+        }
+        int randomGenerator(int num)
+        {
+            return (int) Math.floor((Math.random()*num+1));
+        }
+        boolean CheckIfSafe(int i,int j,int num)
+        {
+            return (unUsedInRow(i, num) &&
+                    unUsedInCol(j, num) &&
+                    unUsedInBox(i-i%SRN, j-j%SRN, num));
+        }
+        boolean unUsedInRow(int i,int num)
+        {
+            for (int j = 0; j<N; j++)
+                if (mat[i][j] == num)
+                    return false;
+            return true;
+        }
+        boolean unUsedInCol(int j,int num)
+        {
+            for (int i = 0; i<N; i++)
+                if (mat[i][j] == num)
+                    return false;
+            return true;
+        }
+        boolean fillRemaining(int i, int j)
+        {
+            if (j>=N && i<N-1)
+            {
+                i = i + 1;
+                j = 0;
+            }
+            if (i>=N && j>=N)
+                return true;
+
+            if (i < SRN)
+            {
+                if (j < SRN)
+                    j = SRN;
+            }
+            else if (i < N-SRN)
+            {
+                if (j==(int)(i/SRN)*SRN)
+                    j =  j + SRN;
+            }
+            else
+            {
+                if (j == N-SRN)
+                {
+                    i = i + 1;
+                    j = 0;
+                    if (i>=N)
+                        return true;
+                }
+            }
+
+            for (int num = 1; num<=N; num++)
+            {
+                if (CheckIfSafe(i, j, num))
+                {
+                    mat[i][j] = num;
+                    if (fillRemaining(i, j+1))
+                        return true;
+
+                    mat[i][j] = 0;
+                }
+            }
+            return false;
+        }
+        public void removeKDigits()
+        {
+            int count = K;
+            while (count != 0)
+            {
+                int cellId = randomGenerator(N*N)-1;
+                // extract coordinates i  and j
+                int i = (cellId/N);
+                int j = cellId%N;
+                if (mat[i][j] != 0)
+                {
+                    count--;
+                    mat[i][j] = 0;
+                }
+            }
+        }
+
+        // Print sudoku
+        public void printSudoku() {
+            for (int i = 0; i < GRID_SIZE; i++) {
+                if (i % 3 == 0 && i != 0) {
+                    System.out.println("-----------------");
+                }
+                for (int j = 0; j < GRID_SIZE; j++) {
+                    if (j % 3 == 0 && j != 0) {
+                        System.out.print("|");
+                    }
+                    System.out.print(mat[i][j] + " ");
+                }
+                System.out.println();
+            }
         }
     }
 
@@ -69,18 +196,18 @@ public class Main {
         return !isNumberInRow(board, number, row) && !isNumberInColumn(board, number, column)
                 && !isNumberInBox(board, number, row, column);
     }
-    private static boolean solveboard(int[][] board) {
+    private static boolean solveboard(int[][] mat) {
         for (int row = 0; row < GRID_SIZE; row++) {
             for (int column = 0; column < GRID_SIZE; column++) {
-                if (board[row][column] == 0) {
+                if (mat[row][column] == 0) {
                     for (int numbertry = 1; numbertry <= GRID_SIZE; numbertry++) {
-                        if (isValidPlacement(board, numbertry, row, column)) {
-                            board[row][column] = numbertry;
-                            if (solveboard(board)) {
+                        if (isValidPlacement(mat, numbertry, row, column)) {
+                            mat[row][column] = numbertry;
+                            if (solveboard(mat)) {
                                 return true;
                             }
                             else {
-                                board[row][column] = 0;
+                                mat[row][column] = 0;
                             }
                         }
                     }
