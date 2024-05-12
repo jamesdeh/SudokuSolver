@@ -2,5 +2,5 @@ Just a quick project I did over a few sessions. I originally created an algorith
 
 Future Improvements:
 
-GUI: GUI to pick difficulty and display initial and solved sudoku in a user-friendly way                   
-Improve Algorithm: Improve algorithms as it is a slow way of solving the issue (Maybe looking at threads?)
+GUI: GUI to pick difficulty and display initial and solved sudoku in a user-friendly way (change the freq of 0)                   
+Improve Algorithm: Improve algorithms as it is a slow way of solving the sudoku (Maybe looking at threads?)
